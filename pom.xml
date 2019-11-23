@@ -1,0 +1,171 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.codinko</groupId>
+	<artifactId>mavenprofilesample</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<profiles>
+
+		<!-- We can configure as many profiles as we want by giving unique profile-ids -->
+
+		<!-- Within each profile element, we can configure many elements such as 
+			dependencies, plugins, resources, finalName, but DO NOTE that this BREAKS 
+			portability of your build, and is an anti-practice. Maven Profiles should 
+			be used only at necessary use-cases and carefully -->
+
+
+		<profile>
+			<id>profile1</id>
+			<!-- add dependencies, plugins, resources, finalName etc -->
+		</profile>
+		<profile>
+			<id>profile2</id>
+			<!-- add dependencies, plugins, resources, finalName etc -->
+		</profile>
+
+		<!-- ###################################################################################### -->
+
+		<!-- If you want to skip tests while doing build of artifact, you could 
+			do "mvn package -Dmaven.test.skip" -->
+		<!-- Let's see as below on how to do this with help of a profile, just 
+			for demo purpose -->
+		<!-- mvn package -Pmyprofile-skip-tests -->
+		<profile>
+			<id>myprofile-skip-tests</id>
+			<properties>
+				<maven.test.skip>true</maven.test.skip>
+			</properties>
+		</profile>
+
+		<!-- Enable/activate a profile based on the JDK running on the machine. 
+			In this case, we want to enable the profile if the JDK version starts with 
+			8 -->
+		<profile>
+			<id>myprofile-active-on-jdk-8</id>
+			<activation>
+				<jdk>8</jdk>
+			</activation>
+		</profile>
+
+		<!-- activate the profile based on some operating system information -->
+		<profile>
+			<id>myprofile-active-on-windows-10</id>
+			<activation>
+				<os>
+					<name>windows 10</name>
+					<family>Windows</family>
+					<arch>amd64</arch>
+					<version>10.0</version>
+				</os>
+			</activation>
+		</profile>
+
+		<!-- Based on a Property , lets see some minimum 4 flavors here. -->
+
+		<!--(1) activate a profile if a property named environment is present -->
+		<!-- mvn package -Denvironment -->
+		<profile>
+			<id>myprofile-1active-on-property-environment</id>
+			<activation>
+				<property>
+					<name>environment</name>
+				</property>
+			</activation>
+		</profile>
+
+		<!--(2) activate a profile if a property is not present -->
+		<!-- mvn package -->
+		<profile>
+			<id>myprofile-2</id>
+			<activation>
+				<property>
+					<name>!environment</name>
+				</property>
+			</activation>
+		</profile>
+
+		<!-- activate the profile if the property has a specific value -->
+		<!-- run the profile with mvn package -Denvironment=test -->
+		<profile>
+			<id>myprofile-3</id>
+			<activation>
+				<property>
+					<name>environment</name>
+					<value>test</value>
+				</property>
+			</activation>
+		</profile>
+
+		<!-- we can activate the profile if the property has a value other then 
+			the specified value -->
+		<!-- This also act as a defaultprofile when no other profile is set or 
+			property-conditions are not met -->
+		<profile>
+			<id>myprofile-4</id>
+			<activation>
+				<property>
+					<name>environment</name>
+					<value>!test</value>
+				</property>
+			</activation>
+		</profile>
+
+		<!-- END of 'property' based profile settings. -->
+
+		<!-- activate a profile if a file exists or is missing. -->
+		<profile>
+			<id>myprofile-active-on-missing-file</id>
+			<activation>
+				<file>
+					<missing>target/testreport.html</missing>
+				</file>
+			</activation>
+		</profile>
+
+		<profile>
+			<id>myprofile-active-on-present-file</id>
+			<activation>
+				<file>
+					<exists>target/artifact.jar</exists>
+				</file>
+			</activation>
+		</profile>
+
+		<!-- Important one: to be used carefully! -->
+		<!-- If we always want to execute a profile, we can make one active by 
+			default -->
+		<!-- we can run "mvn package" without specifying the profiles, and we can 
+			verify that the integration-test profile is active. -->
+		<profile>
+			<id>integration-tests</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+		</profile>
+		<!-- if we run the Maven command and enable another profile, then the activeByDefault 
+			profile is skipped. ie: we run "mvn package -P profile-2-tests" then only 
+			the profile-2-tests profile is active. integration-tests profile is skipped -->
+
+	</profiles>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-help-plugin</artifactId>
+				<version>3.2.0</version>
+				<executions>
+					<execution>
+						<id>show-profiles</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>active-profiles</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>
